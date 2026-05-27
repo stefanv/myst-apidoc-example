@@ -15,7 +15,7 @@ with open('index.md', "w") as f:
     '''))
 
     for pkg in packages:
-        f.write(f'- [{pkg}](./{pkg})\n')
+        f.write(f'- [{pkg}](/{pkg})\n')
 
 
 for pkg in packages:
