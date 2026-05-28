@@ -18,6 +18,8 @@ site:
   template: book-theme
   options:
     folders: true
+    outline_maxdepth: 2
+
   # options:
   #   favicon: favicon.ico
   #   logo: site_logo.png
