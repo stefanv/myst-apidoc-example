@@ -32,11 +32,16 @@ for pkg in packages:
         for module in api:
             f.write(f'- [{module}](./{module})\n')
 
+    print("Generating API stubs:")
     for module in api:
-        with open(f"{pkg}/{module}.md", "w") as f:
+        fn = f"{pkg}/{module}.md"
+        print(f"- {fn}")
+        with open(fn, "w") as f:
            f.write(textwrap.dedent(f'''\
            ---
            title: {pkg}.{module}
+           site:
+             outline_maxdepth: 2
            ---
 
            :::{{apidoc}} ./{pkg}-api.json#{module}
