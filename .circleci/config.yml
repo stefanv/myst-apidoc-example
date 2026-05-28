@@ -59,12 +59,12 @@ jobs:
       - run:
           name: Generate skimage API JSON
           command: |
-            python ~/myst-apidoc/npdoc2json.py skimage > skimage-api.json
+            make skimage-api.json
 
       - run:
           name: Generate MyST index pages
           command: |
-            python generate-index.py
+            make generate
 
       - run:
           name: Build docs
