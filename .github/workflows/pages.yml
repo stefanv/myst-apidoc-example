@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      skip_cache:
+        description: Build without cached API JSON and MyST cache
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -58,6 +63,7 @@ jobs:
 
       # make skips fleece when skimage-api.json exists
       - uses: actions/cache@v4
+        if: ${{ !inputs.skip_cache }}
         with:
           path: skimage-api.json
           key: ${{ steps.api-key.outputs.key }}
@@ -65,12 +71,25 @@ jobs:
       - name: Generate API pages
         run: make generate
 
+      # MyST cache (DOIs, intersphinx inventories) only grows: restore the newest, save a new one each run
+      - uses: actions/cache/restore@v4
+        if: ${{ !inputs.skip_cache }}
+        with:
+          path: _build/cache
+          key: myst-cache-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: myst-cache-
+
       - name: Build docs
         env:
           BASE_URL: /${{ github.event.repository.name }}
         run: |
           npx myst build --html
           rm -f _build/html/*thebe*.js
+
+      - uses: actions/cache/save@v4
+        with:
+          path: _build/cache
+          key: myst-cache-${{ github.run_id }}-${{ github.run_attempt }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
