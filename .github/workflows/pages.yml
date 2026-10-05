@@ -48,6 +48,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # hashFiles() cannot read outside the workspace, so hash fleece here
+      - name: Compute API JSON cache key
+        id: api-key
+        run: |
+          fleece=$(sha256sum ../myst-apidoc/fleece | cut -c1-16)
+          skimage=$(python -c "import skimage; print(skimage.__version__)")
+          echo "key=skimage-api-$skimage-$fleece" >> "$GITHUB_OUTPUT"
+
+      # make skips fleece when skimage-api.json exists
+      - uses: actions/cache@v4
+        with:
+          path: skimage-api.json
+          key: ${{ steps.api-key.outputs.key }}
+
       - name: Generate API pages
         run: make generate
 
