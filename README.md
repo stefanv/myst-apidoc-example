@@ -11,3 +11,6 @@ Click on the CI checkmark and select "docs preview".
 ## Note to self
 
 Manually trigger a build from [CircleCI pipelines page](https://app.circleci.com/pipelines/gh/stefanv/myst-apidoc-example)
+
+GitHub Actions publishes `main` to GitHub Pages.
+Manually trigger a deploy from the [pages workflow page](https://github.com/stefanv/myst-apidoc-example/actions/workflows/pages.yml) ("Run workflow").

@@ -1,0 +1,66 @@
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      # myst.yml and the Makefile expect myst-apidoc next to this repo
+      - name: Clone myst-apidoc
+        run: git clone --depth 1 https://github.com/stefanv/myst-apidoc ../myst-apidoc
+
+      - name: Build myst-apidoc plugin
+        working-directory: ../myst-apidoc/myst-apidoc-plugin
+        run: |
+          npm install
+          npm run build
+
+      - name: Install dependencies
+        run: |
+          npm install mystmd
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate API pages
+        run: make generate
+
+      - name: Build docs
+        env:
+          BASE_URL: /${{ github.event.repository.name }}
+        run: |
+          npx myst build --html
+          rm -f _build/html/*thebe*.js
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _build/html
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
